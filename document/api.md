@@ -342,7 +342,7 @@ type RebuildData struct {
 	PayloadCID string   `json:"payload_cid"`
 	PayloadURL string   `json:"payload_url"`
 	Providers  []string `json:"providers"`
-    IsDir      bool     `json:"is_dir"`
+        IsDir      bool     `json:"is_dir"`
 	Size       int64    `json:"size"`
 	DueAt      int64    `json:"due_at"`
 	CreatedAt  int64    `json:"created_at"`
