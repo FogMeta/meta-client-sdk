@@ -254,6 +254,35 @@ func (m *MetaClient) DownloadFileInfo(ipfsCid string) ([]*DownloadFileInfo, erro
 	return res.Result.Data, nil
 }
 
+// Rebuild rebuilds the backup dataset files
+func (m *MetaClient) Rebuild(datasetId int64, ipfsCids ...string) (list []*RebuildData, err error) {
+	response, err := m.httpPost(JsonRpcParams{
+		JsonRpc: "2.0",
+		Method:  "meta.DatasetRebuild",
+		Params: []interface{}{
+			RebuildReq{
+				DatasetID:   datasetId,
+				PayloadCIDs: ipfsCids,
+			},
+		},
+		Id: 1,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	res := JsonRpcResp{}
+	res.Result.Data = &list
+	if err = json.Unmarshal(response, &res); err != nil {
+		return nil, err
+	}
+
+	if res.Result.Code != "success" {
+		return nil, errors.New(res.Result.Message)
+	}
+	return list, nil
+}
+
 func (m *MetaClient) httpPost(params interface{}) ([]byte, error) {
 	if m.key == "" || m.token == "" {
 		return nil, errors.New("key or token is required")

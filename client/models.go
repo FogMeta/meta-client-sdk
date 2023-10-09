@@ -166,6 +166,32 @@ type DownloadFileInfo struct {
 	IsDirectory bool   `json:"is_directory"`
 }
 
+type RebuildReq struct {
+	DatasetID   int64    `json:"dataset_id"`
+	Object      string   `json:"object"`
+	PayloadCIDs []string `json:"payload_cids"`
+}
+
+type RebuildData struct {
+	Status     int      `json:"status"`
+	PayloadCID string   `json:"payload_cid"`
+	PayloadURL string   `json:"payload_url"`
+	Providers  []string `json:"providers"`
+	IsDir      bool     `json:"is_dir"`
+	Size       int64    `json:"size"`
+	DueAt      int64    `json:"due_at"`
+}
+
+type JsonRpcResp struct {
+	JsonRpc string `json:"jsonrpc"`
+	Result  struct {
+		Code    string      `json:"code"`
+		Message string      `json:"message,omitempty"`
+		Data    interface{} `json:"data,omitempty"`
+	} `json:"result"`
+	Id int `json:"id"`
+}
+
 // list option
 type listOption struct {
 	ShowCar bool

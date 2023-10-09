@@ -111,6 +111,14 @@ go get github.com/FogMeta/go-mc-sdk
     datasetListPager, err := metaClient.ListStatus("dataset-name", ipfsCid, pageNum, pageSize)
 ```
 
+### [Rebuild](document/api.md#rebuild)
+
+`Rebuild` rebuilds the backup dataset files
+
+```
+    list, err := metaClient.Rebuild(datasetId, ipfsCids...)
+```
+
 ## API Documentation
 
 For more details, please check out the [API Documentation](document/api.md ':include').
