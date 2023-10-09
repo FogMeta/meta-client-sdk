@@ -8,6 +8,7 @@
   - [List](#list)
   - [ListStatus](#liststatus)
   - [SourceFileInfo](#sourcefileinfo)
+  - [Rebuild](#rebuild)
 
 ## NewClient
 
@@ -48,7 +49,7 @@ Outputs:
 
 `Upload` uploads file or directory to ipfs
 
-```shell
+```go
 func (m *MetaClient) Upload(inputPath string) (ipfsData *IpfsData, err error) 
 ```
 
@@ -85,7 +86,7 @@ type IpfsData struct {
 
 `Backup` backups the uploaded files with the datasetName,support multiple IpfsData
 
-```shell
+```go
 func (m *MetaClient) Backup(datasetName string, ipfsData ...*IpfsData)   error 
 ```
 
@@ -101,7 +102,7 @@ Inputs:
 
 `Download` downloads all the files related with the specified ipfsCid default,and downloads specific files with the specified downloadUrl
 
-```shell
+```go
 func (m *MetaClient) Download(ipfsCid string, outPath string, downloadUrl ...string) error
 ```
 
@@ -118,7 +119,7 @@ Inputs:
 
 `List` lists the backup files with the given datasetName
 
-```shell
+```go
 func (m *MetaClient) List(datasetName string, pageNum, size int) (*ListPager, error) 
 ```
 
@@ -191,7 +192,7 @@ type IpfsDataDetail struct {
 
 `ListStatus` lists the status of backup files
 
-```shell
+```go
 func (m *MetaClient) ListStatus(datasetName, ipfsCid string, pageNum, size int) (*ListStatusPager, error)
 ```
 
@@ -275,7 +276,7 @@ type StorageProvider struct {
 Definition:
 Get the source file information by the IPFS CID from the Meta Server.
 
-```shell
+```go
 func (m *MetaClient) SourceFileInfo(ipfsCid string) ([]IpfsDataDetail, error)
 ```
 
@@ -309,3 +310,51 @@ type IpfsDataDetail struct {
 | DataSize    | int64  | The size of the IPFS data in bytes                                                         |
 | IsDirectory | bool   | The type of data, used to differentiate whether it is a directory or not                   |
 | DownloadUrl | string | The download link for the IPFS data, used to download the data file from the IPFS gateway  |
+
+## Rebuild
+ 
+Definition:
+
+Rebuild the backup file when the local file is missed
+
+```go
+func (m *MetaClient) Rebuild(datasetId int64, ipfsCids ...string) ([]*RebuildData, error)
+```
+
+Inputs:
+
+```shell
+datasetId            # The dataset id.
+ipfsCids             # IPFS cids to be queried,if not provided, means rebuild all dataset
+```
+
+Outputs:
+
+```shell
+[]*RebuildData       # List of rebuild data details
+error                # error or nil
+```
+
+Structs:
+```go
+type RebuildData struct {
+	Status     int      `json:"status"`
+	PayloadCID string   `json:"payload_cid"`
+	PayloadURL string   `json:"payload_url"`
+	Providers  []string `json:"providers"`
+        IsDir      bool     `json:"is_dir"`
+	Size       int64    `json:"size"`
+	DueAt      int64    `json:"due_at"`
+	CreatedAt  int64    `json:"created_at"`
+}
+```
+| name        | type     | description                                                                                |
+| ----------- | -------- | ------------------------------------------------------------------------------------------ |
+| Status      | int      | rebuild status                                                                             |
+| payload_cid | string   | The CID (Content Identifier) of the IPFS data, which is used to uniquely identify the data |
+| payload_url | string   | download url for the ipfs cid                                                              |
+| providers   | []string | the storage providers for the ipfs cid                                                     |
+| is_dir      | bool     | whether is directory                                                                       |
+| size        | int64    | file size                                                                                  |
+| due_at      | int64    | storage expired time unix, unit second                                                     |
+| created_at  | int64    | created time unix, unit second                                                             |

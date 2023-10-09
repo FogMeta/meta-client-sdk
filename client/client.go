@@ -106,7 +106,7 @@ func (m *MetaClient) Download(ipfsCid, outPath string, downloadUrl ...string) er
 	if len(downloadUrl) > 0 && downloadUrl[0] != "" {
 		download := downloadUrl[0]
 		if !strings.Contains(download, ipfsCid) {
-			log.Printf("datacid: %s should be included in the url %s, but it is not.", ipfsCid, download)
+			log.Printf("ipfs cid: %s should be included in the url %s, but it is not.\n", ipfsCid, download)
 		}
 
 		downloadFile := PathJoin(outPath, filepath.Base(downInfo[0].SourceName))
@@ -114,33 +114,27 @@ func (m *MetaClient) Download(ipfsCid, outPath string, downloadUrl ...string) er
 			downloadFile = downloadFile + ".tar"
 		}
 
-		if err := downloadFileByAria2(m.conf.Aria2Conf, download, downloadFile); err != nil {
-			return err
-		}
-
-	} else {
-		// aria2 download file
-		for _, info := range downInfo {
-			realUrl := info.DownloadUrl
-			if !strings.Contains(realUrl, ipfsCid) {
-				log.Printf("datacid: %s should be included in the url %s, but it is not.", ipfsCid, realUrl)
-				continue
-			}
-
-			downloadFile := PathJoin(outPath, filepath.Base(info.SourceName))
-			if info.IsDirectory {
-				realUrl = realUrl + "?format=tar"
-				downloadFile = downloadFile + ".tar"
-			}
-
-			err := downloadFileByAria2(m.conf.Aria2Conf, realUrl, downloadFile)
-			if err == nil {
-				return nil
-			}
-		}
+		return downloadFileByAria2(m.conf.Aria2Conf, download, downloadFile)
 	}
 
-	return nil
+	// find matched one & download
+	for _, info := range downInfo {
+		realUrl := info.DownloadUrl
+		if !strings.Contains(realUrl, ipfsCid) {
+			log.Printf("ipfs cid: %s should be included in the url %s, but it is not.\n", ipfsCid, realUrl)
+			continue
+		}
+
+		downloadFile := PathJoin(outPath, filepath.Base(info.SourceName))
+		if info.IsDirectory {
+			realUrl = realUrl + "?format=tar"
+			downloadFile = downloadFile + ".tar"
+		}
+
+		return downloadFileByAria2(m.conf.Aria2Conf, realUrl, downloadFile)
+	}
+
+	return errors.New("not found matched ipfs cid download url")
 }
 
 // Backup backups the uploaded files with the datasetName,
@@ -166,9 +160,8 @@ func (m *MetaClient) Backup(datasetName string, ipfsDataList ...*IpfsData) error
 	}
 
 	if res.Result.Code != "success" {
-		return errors.New("failed message from meta server")
+		return errors.New(res.Result.Message)
 	}
-
 	return nil
 }
 
@@ -189,6 +182,9 @@ func (m *MetaClient) List(datasetName string, pageNum, size int) (*DatasetListPa
 		return nil, err
 	}
 
+	if res.Result.Code != "success" {
+		return nil, errors.New(res.Result.Message)
+	}
 	return &res.Result.Data, nil
 }
 
@@ -209,6 +205,9 @@ func (m *MetaClient) ListStatus(datasetName, ipfsCid string, pageNum, size int) 
 		return nil, err
 	}
 
+	if res.Result.Code != "success" {
+		return nil, errors.New(res.Result.Message)
+	}
 	return &res.Result.Data, nil
 }
 
@@ -227,6 +226,9 @@ func (m *MetaClient) SourceFileInfo(ipfsCid string) ([]*IpfsDataDetail, error) {
 		return nil, err
 	}
 
+	if res.Result.Code != "success" {
+		return nil, errors.New(res.Result.Message)
+	}
 	return res.Result.Data, nil
 }
 
@@ -246,7 +248,39 @@ func (m *MetaClient) DownloadFileInfo(ipfsCid string) ([]*DownloadFileInfo, erro
 		return nil, err
 	}
 
+	if res.Result.Code != "success" {
+		return nil, errors.New(res.Result.Message)
+	}
 	return res.Result.Data, nil
+}
+
+// Rebuild rebuilds the backup dataset files
+func (m *MetaClient) Rebuild(datasetId int64, ipfsCids ...string) (list []*RebuildData, err error) {
+	response, err := m.httpPost(JsonRpcParams{
+		JsonRpc: "2.0",
+		Method:  "meta.DatasetRebuild",
+		Params: []interface{}{
+			RebuildReq{
+				DatasetID:   datasetId,
+				PayloadCIDs: ipfsCids,
+			},
+		},
+		Id: 1,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	res := JsonRpcResp{}
+	res.Result.Data = &list
+	if err = json.Unmarshal(response, &res); err != nil {
+		return nil, err
+	}
+
+	if res.Result.Code != "success" {
+		return nil, errors.New(res.Result.Message)
+	}
+	return list, nil
 }
 
 func (m *MetaClient) httpPost(params interface{}) ([]byte, error) {
@@ -257,5 +291,4 @@ func (m *MetaClient) httpPost(params interface{}) ([]byte, error) {
 		return nil, errors.New("meta server is required")
 	}
 	return httpRequestWithKey(http.MethodPost, m.conf.MetaServer, m.key, m.token, params)
-
 }
