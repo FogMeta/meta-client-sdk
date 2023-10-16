@@ -98,7 +98,7 @@ go get github.com/FogMeta/go-mc-sdk
 ```
     pageNum := 0 // start from 0
     pageSize := 10
-    datasetListPager, err := metaClient.GetDatasetList("dataset-name", pageNum, pageSize)
+    datasetListPager, err := metaClient.List("dataset-name", pageNum, pageSize)
 ```
 
 ### [ListStatus](document/api.md#liststatus)
