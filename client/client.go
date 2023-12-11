@@ -139,9 +139,9 @@ func (m *MetaClient) Download(ipfsCid, outPath string, downloadUrl ...string) er
 
 // Backup backups the uploaded files with the datasetName,
 // support multiple IpfsData
-func (m *MetaClient) Backup(datasetName string, ipfsDataList ...*IpfsData) error {
+func (m *MetaClient) Backup(datasetName string, ipfsDataList ...*IpfsData) (id int64, err error) {
 	if len(ipfsDataList) == 0 {
-		return errors.New("ipfsData is required")
+		return 0, errors.New("ipfsData is required")
 	}
 
 	response, err := m.httpPost(JsonRpcParams{
@@ -151,18 +151,18 @@ func (m *MetaClient) Backup(datasetName string, ipfsDataList ...*IpfsData) error
 		Id:      1,
 	})
 	if err != nil {
-		return err
+		return
 	}
 
 	var res StoreSourceFileResponse
 	if err = json.Unmarshal(response, &res); err != nil {
-		return err
+		return
 	}
 
 	if res.Result.Code != "success" {
-		return errors.New(res.Result.Message)
+		return 0, errors.New(res.Result.Message)
 	}
-	return nil
+	return res.Result.Data, nil
 }
 
 // List lists the backup files with the given datasetName
