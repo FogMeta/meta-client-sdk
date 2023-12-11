@@ -33,7 +33,7 @@ func main() {
 
 	// report ipfs cid to meta server
 	datasetName := "dataset-name"
-	err = metaClient.Backup(datasetName, ipfsData)
+	datasetId, err := metaClient.Backup(datasetName, ipfsData)
 	if err != nil {
 		log.Println("report meta client server  failed:", err)
 		return
@@ -75,5 +75,11 @@ func main() {
 	}
 	log.Printf("get source file status success: %+v\n", sourceFileStatusPager)
 
-	return
+	// rebuild dataset
+	data, err := metaClient.Rebuild(datasetId)
+	if err != nil {
+		log.Println("get source file status failed:", err)
+		return
+	}
+	log.Printf("rebuild dataset success: %+v\n", data)
 }
