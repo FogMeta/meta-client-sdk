@@ -4,9 +4,9 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/FogMeta)](https://twitter.com/FogMeta)
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
 
-A Golang SDK for the MC([Meta Client](https://github.com/FogMeta/meta-client)) service, providing an easy interface for developers to deal with the Meta-Client API. It streamlines the process of securely storing, retrieving and recovering data on the IPFS and Filecoin network. 
+A Golang SDK for the MetaArk product, providing an easy interface for developers to deal with the Filecoin network. It streamlines the process of securely storing, retrieving and recovering data on the IPFS and Filecoin network. 
 
-Meta-Client is a Web3 data service that securely stores data backups and enables data recovery. It automatically records data storage information and stores data on both the IPFS gateway and Filecoin network, providing fast retrieval and permanent backup.
+MetaArk is a Web3 data service that securely stores data backups and enables data recovery. It automatically records data storage information and stores data on both the IPFS gateway and Filecoin network, providing fast retrieval and permanent backup.
 
 ## Features
 
@@ -14,7 +14,7 @@ Meta-Client is a Web3 data service that securely stores data backups and enables
 
 - Upload files or directories to the IPFS gateway
 - Report data information to the Meta-Client server 
-    - Meta-Client will automatically complete data processing(split or merge file and generate CAR files)
+    - MetaArk will automatically complete data processing(split or merge file and generate CAR files)
     - Store the CAR file in the IPFS gateway
     - Send CAR files to the storage providers in the Filecoin network
 - Download files or directories to the local machine
@@ -32,7 +32,7 @@ Before using `go-mc-sdk`, you need to install the following services:
 sudo apt install aria2 
 ```
 - [IPFS service](https://docs.ipfs.tech/install/command-line/#install-official-binary-distributions)
-- [Go](https://golang.org/dl/) (1.16 or later)
+- [Go](https://golang.org/dl/) (1.20 or later)
 
 ## Installation
 
